@@ -1,4 +1,5 @@
-#pragma once
+#ifndef I2C_DRIVER_H
+#define I2C_DRIVER_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,3 +9,6 @@
 void i2cDriverInit(void);
 esp_err_t i2cDriverReadReg(uint8_t deviceAddr, uint8_t regAddr, uint8_t* data);
 esp_err_t i2cDriverWriteReg(uint8_t deviceAddr, uint8_t regAddr, uint8_t data);
+void i2cAttachDevice(uint8_t deviceAddr);
+
+#endif
