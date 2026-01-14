@@ -15,11 +15,12 @@ void TelemetryInit(void){
     uart_driver_install(UART_NUM_1, 1024 * 2, 0, 0, NULL, 0);
 }
 
-void TelemetrySend(const TelemetryData* data){
+void TelemetrySend(const TrackerResult* data){
     if(data == NULL){
         return;
     }
     char buffer[96];
+    /*
     int len = snprintf(buffer, 
                        sizeof(buffer),
                        "t=%" PRIu32 " ax=%.2f, ay=%.2f, temp=%.2f, locked=%d, load=%.2f\r\n",
@@ -31,5 +32,5 @@ void TelemetrySend(const TelemetryData* data){
                        data->systemLoad);
     if(len < 0)return;
     if (len >= (int)sizeof(buffer)) len = sizeof(buffer) - 1;
-    uart_write_bytes(UART_NUM_1, buffer, len);
+    uart_write_bytes(UART_NUM_1, buffer, len);*/
 }

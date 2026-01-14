@@ -6,57 +6,62 @@
 #include "freertos/FreeRTOS.h"
 #include "mlx90640API.h"
 #include "mlx90640Driver.h"
+#include "tracker.h"
+#include "telemetry.h"
+
+#define MLX90640_REFRESH_16HZ 5
 
 paramsMLX90640 mlxParams;
 uint16_t mlxFrame[834];
-uint16_t eeData[832];
-float image[768];
-
+static float image[768];
+static TrackerResult trackerResult;
 float emissivity = 1.f;
 float Ta = 25.f;
 
 void ThermalTaskInit(void)
 {
-    if (MLX90640_DumpEE(0x33, eeData) != 0) {
+    uint16_t eeData[832];
+    if (MLX90640_DumpEE(0x33, eeData) != 0) 
+    {
         ESP_LOGI("THERMAL", "Failed to dump EEPROM data");
         return;
     }
-    MLX90640_ExtractParameters(eeData, &mlxParams);
+    if (MLX90640_ExtractParameters(eeData, &mlxParams) != 0) 
+    {
+        ESP_LOGI("THERMAL", "Failed to extract parameters");
+        return;
+    }
+    if (MLX90640_SetRefreshRate(0x33, MLX90640_REFRESH_16HZ) != 0) 
+    {
+        ESP_LOGI("THERMAL", "Failed to set refresh rate");
+        return;
+    }
 }
-
 // TEMP RANGES ROUGHLY -40C TO 300C
 // BEST RANGES ARE 0 to 100
 
 void ThermalTaskStart(void* pvParameters)
 {
-    while(1){
-        if (MLX90640_GetFrameData(0x33, mlxFrame) >= 0) {
-            MLX90640_CalculateTo(mlxFrame, &mlxParams, emissivity, Ta, image);
-            float maxTemp = -1000.f;
-            int maxIdx = 0;
-            for (int i = 0; i < 768; i++) {
-                if (image[i] > maxTemp) {
-                    maxTemp = image[i];
-                    maxIdx = i;
-                }
-            }
-
-            if (maxTemp < MINIMUM_TEMP || maxTemp > MAXIMUM_TEMP) {
-                ESP_LOGI("THERMAL", "Max Temp out of range: %.2f C", maxTemp);
-                continue;
-            }
-
-            if (maxTemp >= 60.f)
-            {
-                ESP_LOGI("THERMAL", "Max Temp: %.2f C at Index: %d", maxTemp, maxIdx);
-                int row = maxIdx / 32;
-                int col = maxIdx % 32;
-            } 
-        } 
-        else 
+    while(1)
+    {
+        if (MLX90640_GetFrameData(0x33, mlxFrame) >= 0) 
         {
-            ESP_LOGI("THERMAL", "Failed to get frame data");
-        }
+            MLX90640_CalculateTo(mlxFrame, &mlxParams, emissivity, Ta, image);
+            for (int i = 0; i < 768; i++)
+            {
+                if (image[i] < MINIMUM_TEMP) image[i] = MINIMUM_TEMP;
+                if (image[i] > MAXIMUM_TEMP) image[i] = MAXIMUM_TEMP;
+            }
+
+            // Tracker Calculates
+            TrackerUpdate(image, &trackerResult);
+
+            // Telemetry Sends
+            TelemetrySend(&trackerResult);
+
+        } 
+        else ESP_LOGI("THERMAL", "Failed to get frame data");
+
         // 16Hz refresh rate delay
         vTaskDelay(pdMS_TO_TICKS(62.5)); 
     }

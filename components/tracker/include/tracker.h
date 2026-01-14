@@ -10,11 +10,13 @@ typedef struct{
     float maxTemp;
     float distance;
     bool targetLocked;
+    int maxIdx;
     uint8_t pixelX;
     uint8_t pixelY;
 } TrackerResult;
 
 void TrackerInit(void);
 void TrackerUpdate(const float* tempMap, TrackerResult* result);
+void TrackerStartTracking(TrackerResult* info);
 
 #endif

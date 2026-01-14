@@ -1,0 +1,31 @@
+#ifndef SERVOCONTROLLER_H
+#define SERVOCONTROLLER_H
+
+#include "driver/ledc.h"
+
+#define SERVO_FREQ_HZ 50
+#define SERVO_TIMER LEDC_TIMER_0
+#define SERVO_MODE LEDC_LOW_SPEED_MODE
+#define SERVO_RESOLUTION LEDC_TIMER_16_BIT
+#define SERVO_X_CHANNEL LEDC_CHANNEL_0
+#define SERVO_Y_CHANNEL LEDC_CHANNEL_1
+#define SERVO_X_PIN 18
+#define SERVO_Y_PIN 19
+#define SERVO_MIN_US 500
+#define SERVO_MAX_US 2500
+
+typedef struct{
+    float angleX;
+    float angleY;
+} ServoAngles;
+
+void ServoInit(void);
+void UpdateAngles(ServoAngles targetAngles, float deltaTime);
+void StopServos();
+
+int pinX;
+int pinY;
+float currentX;
+float currentY;
+
+#endif
