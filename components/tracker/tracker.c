@@ -1,5 +1,6 @@
 #include "tracker.h"
 #include <math.h>
+#include "trackingState.h"
 
 #define XFOV 55.0f
 #define YFOV 35.0f
@@ -45,19 +46,36 @@ void TrackerUpdate(const float* tempMap, TrackerResult* result)
     result->angleX = angleX;
     result->angleY = angleY;
 
-    result->targetLocked = (maxTemp > TEMP_THRESHOLD);
-    if (result->targetLocked && !bShouldShift) 
+    tracking_state_t currentState = TrackerGetState();
+
+    result->targetLocked = (maxTemp > TEMP_THRESHOLD) && !bShouldShift && (currentState != TRACKER_DISABLED);
+
+    if (result->targetLocked) 
     {
         TrackerStartTracking(result);
-    } else 
+    } 
+    else 
     {
         result->angleX = prevAngleX;
         result->angleY = prevAngleY;
     }
 }
 
+// Tracking, calculate angle
+
 void TrackerStartTracking(TrackerResult* info)
 {
     prevAngleX = info->angleX;
     prevAngleY = info->angleY;
+
+    float errorX = info->angleX - 15.5f;
+    float errorY = info->angleY - 11.5f;
+
+    float degPerPixelX = XFOV / 32.f;
+    float degPerPixelY = YFOV / 24.f;
+
+    float angleX = errorX * degPerPixelX;
+    float angleY = errorY * degPerPixelY;
+
+    
 }

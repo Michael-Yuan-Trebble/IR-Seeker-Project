@@ -37,6 +37,7 @@ void ThermalTaskInit(void)
         return;
     }
 }
+
 // TEMP RANGES ROUGHLY -40C TO 300C
 // BEST RANGES ARE 0 to 100
 
