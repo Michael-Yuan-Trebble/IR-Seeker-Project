@@ -20,17 +20,12 @@ void TelemetrySend(const TrackerResult* data){
         return;
     }
     char buffer[96];
-    /*
+    
     int len = snprintf(buffer, 
                        sizeof(buffer),
-                       "t=%" PRIu32 " ax=%.2f, ay=%.2f, temp=%.2f, locked=%d, load=%.2f\r\n",
-                       data->timestamp,
-                       data->targetAngleX,
-                       data->targetAngleY,
-                       data->targetTemp,
-                       data->targetLocked ? 1 : 0,
-                       data->systemLoad);
+                       "ANGLE_X:%.2f,ANGLE_Y:%.2f,MAX_TEMP:%.2f,TARGET_LOCKED:%d,PIXEL_X:%d,PIXEL_Y:%d,MAX_IDX:%d\r\n",
+                       data->angleX, data->angleY, data->maxTemp, data->targetLocked, data->pixelX, data->pixelY, data->maxIdx);
     if(len < 0)return;
     if (len >= (int)sizeof(buffer)) len = sizeof(buffer) - 1;
-    uart_write_bytes(UART_NUM_1, buffer, len);*/
+    uart_write_bytes(UART_NUM_1, buffer, len);
 }

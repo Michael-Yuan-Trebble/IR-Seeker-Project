@@ -23,9 +23,4 @@ void ServoInit(void);
 void UpdateAngles(ServoAngles targetAngles, float deltaTime);
 void StopServos();
 
-int pinX;
-int pinY;
-float currentX;
-float currentY;
-
 #endif

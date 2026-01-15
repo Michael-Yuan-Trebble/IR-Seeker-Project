@@ -1,4 +1,4 @@
 idf_component_register(SRCS "telemetry.c"
                     INCLUDE_DIRS "include"
-                    REQUIRES esp_driver_i2c esp_driver_uart
-                    PRIV_REQUIRES tracker)
+                    REQUIRES esp_driver_i2c esp_driver_uart trackingState
+                    PRIV_REQUIRES tracker driver)

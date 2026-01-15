@@ -1,5 +1,13 @@
 #include "servoController.h"
 #include "mathUtils.h"
+#include "freertos/FreeRTOS.h"
+#include <math.h>
+
+#define SERVO_ALPHA 0.15f
+#define SERVO_DEADZONE_DEG 0.5f
+
+float currentX = 0.f;
+float currentY = 0.f;
 
 ServoAngles currentAngles;
 
@@ -33,14 +41,9 @@ void ServoInit(void)
     ledc_channel_y.channel = SERVO_Y_CHANNEL;
     ledc_channel_y.gpio_num = SERVO_Y_PIN;
     ledc_channel_config(&ledc_channel_y);
+
+    UpdateAngles((ServoAngles){0.0f, 0.0f}, 1.0f);
 }
-
-float currentX = 0.f;
-float currentY = 0.f;
-
-#define SERVO_ALPHA 0.15f
-#define SERVO_DEADZONE_DEG 0.5f
-#include <math.h>
 
 void UpdateAngles(ServoAngles targetAngles, float deltaTime)
 {
@@ -69,4 +72,9 @@ void UpdateAngles(ServoAngles targetAngles, float deltaTime)
 }
 
 void StopServos(){
+    UpdateAngles((ServoAngles){0.0f, 0.0f}, 1.0f);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    ledc_stop(SERVO_MODE, SERVO_X_CHANNEL, 0);
+    ledc_stop(SERVO_MODE, SERVO_Y_CHANNEL, 0);
 }
