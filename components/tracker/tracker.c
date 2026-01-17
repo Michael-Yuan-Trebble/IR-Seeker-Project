@@ -3,19 +3,9 @@
 #include "trackingState.h"
 #include "servoController.h"
 
-#define XFOV 55.0f
-#define YFOV 35.0f
-#define TEMP_THRESHOLD 50.0f
-#define COLUMN_THRESHOLD 3
-#define ROW_THRESHOLD 3
-
-#define SEEKER_TIMEOUT_MS 30000
-
 static float prevAngleX = 0.f;
 static float prevAngleY = 0.f;
-
 bool prevTargetLocked = false;
-
 static TimerHandle_t seekerTimeoutTimer;
 
 static void seekerTimeoutCallback(TimerHandle_t xTimer)
@@ -28,7 +18,6 @@ void TrackerInit(void)
 {
     // Init Tracker State
     TrackerSetState(TRACKER_DISABLED);
-
     seekerTimeoutTimer = xTimerCreate("SeekerTimeout", pdMS_TO_TICKS(SEEKER_TIMEOUT_MS), pdFALSE, NULL, seekerTimeoutCallback);
 }
 
@@ -64,36 +53,25 @@ void TrackerUpdate(const float* tempMap, TrackerResult* result)
 
     tracking_state_t currentState = TrackerGetState();
 
-    if (currentState == TRACKER_DISABLED) 
-    {
-        StopServos();
-    }
+    if (currentState == TRACKER_DISABLED) StopServos();
 
     prevTargetLocked = result->targetLocked;
     result->targetLocked = (maxTemp > TEMP_THRESHOLD) && !bShouldShift && (currentState != TRACKER_DISABLED);
     
-    if (result->targetLocked) 
-    {
-        TrackerStartTracking(result);
-    } 
+    if (result->targetLocked) TrackerStartTracking(result);
     else 
     {
-        if (prevTargetLocked == true) 
-        {
-            xTimerStop(seekerTimeoutTimer, 0);
-        }
+        if (prevTargetLocked == true) xTimerStop(seekerTimeoutTimer, 0);
+
         result->angleX = prevAngleX;
         result->angleY = prevAngleY;
     }
 }
 
-// Tracking, calculate angle
-
+// Tracking, calculate angles and update servos
 void TrackerStartTracking(TrackerResult* info)
 {
-    if (prevTargetLocked == false){
-         xTimerReset(seekerTimeoutTimer, 0);
-    }
+    if (prevTargetLocked == false) xTimerReset(seekerTimeoutTimer, 0);
 
     prevAngleX = info->angleX;
     prevAngleY = info->angleY;

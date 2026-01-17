@@ -8,6 +8,6 @@
 
 void ButtonTaskInit(void);
 void ButtonTaskStart(void* pvParameters);
-void ButtonTaskStop(void);
+void ButtonTaskConfigure(void);
 
 #endif

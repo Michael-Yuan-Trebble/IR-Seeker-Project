@@ -1,17 +1,11 @@
 #include "i2cDriver.h"
 
+#include <stdbool.h>
 #include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "driver/i2c_master.h"
 #include "esp_log.h"
-
-#define I2C_PORT I2C_NUM_0
-#define I2C_SDA_PIN 21
-#define I2C_SCL_PIN 22
-#define I2C_FREQ_HZ 400000
-#define I2C_TIMEOUT_MS 100
 
 static i2c_master_bus_handle_t bus_handle;
 

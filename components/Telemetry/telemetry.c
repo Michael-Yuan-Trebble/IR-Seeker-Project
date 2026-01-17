@@ -1,6 +1,8 @@
 #include "telemetry.h"
 #include <inttypes.h>
+#include <stdbool.h>
 #include "driver/uart.h"
+#include "trackingState.h"
 
 void TelemetryInit(void){
     const uart_config_t uart_config = {
@@ -15,10 +17,10 @@ void TelemetryInit(void){
     uart_driver_install(UART_NUM_1, 1024 * 2, 0, 0, NULL, 0);
 }
 
-void TelemetrySend(const TrackerResult* data){
-    if(data == NULL){
-        return;
-    }
+void TelemetrySend(const TrackerResult* data)
+{
+    if(data == NULL) return;
+    
     char buffer[96];
     
     int len = snprintf(buffer, 

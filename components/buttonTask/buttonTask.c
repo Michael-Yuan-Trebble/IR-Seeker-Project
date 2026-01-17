@@ -16,10 +16,7 @@ static void IRAM_ATTR buttonISRHandler(void* arg)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xEventGroupSetBitsFromISR(buttonEventGroup, INPUT_BTN_PRESS, &xHigherPriorityTaskWoken);
-    if (xHigherPriorityTaskWoken) 
-    {
-        portYIELD_FROM_ISR();
-    }
+    if (xHigherPriorityTaskWoken) portYIELD_FROM_ISR();
 }
 
 void ButtonTaskStart(void* pvParameters)
@@ -41,7 +38,7 @@ void ButtonTaskStart(void* pvParameters)
     }
 }
 
-void ButtonTaskStop(void)
+void ButtonTaskConfigure(void)
 {
     buttonEventGroup = xEventGroupCreate();
 

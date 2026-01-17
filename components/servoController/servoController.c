@@ -3,17 +3,15 @@
 #include "freertos/FreeRTOS.h"
 #include <math.h>
 
-#define SERVO_ALPHA 0.15f
-#define SERVO_DEADZONE_DEG 0.5f
-
 float currentX = 0.f;
 float currentY = 0.f;
 
 ServoAngles currentAngles;
 
+// Convert microseconds to duty cycle
 static uint32_t usToDuty(uint32_t us) {
-    const uint32_t maxDuty = (1 << SERVO_RESOLUTION) - 1;
-    return (us * maxDuty) / 20000; // 20ms period for 50Hz
+    const uint32_t maxDuty = 1000000 / SERVO_MAX_DUTY; // 20000us for 50Hz
+    return (us * SERVO_MAX_DUTY) / maxDuty;
 }
 
 void ServoInit(void)
@@ -50,14 +48,12 @@ void UpdateAngles(ServoAngles targetAngles, float deltaTime)
     float dx = ClampFloat(targetAngles.angleX, -45.0f, 45.0f);
     float dy = ClampFloat(targetAngles.angleY, -30.0f, 30.0f);
 
-    if (fabsf(dx - currentX) < SERVO_DEADZONE_DEG) {
-        dx = currentX;
-    }
-    if (fabsf(dy - currentY) < SERVO_DEADZONE_DEG) {
-        dy = currentY;
-    }
+    if (fabsf(dx - currentX) < SERVO_DEADZONE_DEG) dx = currentX;
+    if (fabsf(dy - currentY) < SERVO_DEADZONE_DEG) dy = currentY;
+
     currentX += (dx - currentX) * SERVO_ALPHA;
     currentY += (dy - currentY) * SERVO_ALPHA;
+
     currentX = ClampFloat(currentX, -45.0f, 45.0f);
     currentY = ClampFloat(currentY, -30.0f, 30.0f);
 
@@ -71,7 +67,9 @@ void UpdateAngles(ServoAngles targetAngles, float deltaTime)
     ledc_update_duty(SERVO_MODE, SERVO_Y_CHANNEL);
 }
 
-void StopServos(){
+// Stop servos by setting angles to neutral and stopping PWM
+void StopServos()
+{
     UpdateAngles((ServoAngles){0.0f, 0.0f}, 1.0f);
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
